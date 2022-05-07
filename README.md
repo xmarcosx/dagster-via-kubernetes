@@ -1,11 +1,18 @@
 ## Dagster on GKE
 
 ```sh
-
+gcloud services enable artifactregistry.googleapis.com;
 gcloud services enable compute.googleapis.com;
 gcloud services enable container.googleapis.com;
 
 gcloud config set compute/region us-central1;
+
+# create artifact registry repository
+gcloud artifacts repositories create my-repository \
+    --project=$GOOGLE_CLOUD_PROJECT \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Docker repository";
 
 # create gke autopilot cluster
 gcloud container clusters create-auto my-cluster;
@@ -19,7 +26,7 @@ helm repo update;
 
 helm show values dagster/dagster > values.yaml;
 
-helm upgrade --install dagster dagster/dagster -f values.yaml;
+helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f values.yaml;
 
 export DAGIT_POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}");
 

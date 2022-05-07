@@ -9,5 +9,5 @@ dagster-user-deployments:
         pullPolicy: Always
       dagsterApiGrpcArgs:
         - "--python-file"
-        - "/example_project/example_repo/repo.py"
+        - "/example_project/project/repo.py"
       port: 3030
