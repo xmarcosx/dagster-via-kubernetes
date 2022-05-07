@@ -1,6 +1,6 @@
 from dagster import repository
 
-from jobs.hello import hello_dagster
+from example_project.project.jobs.hello import hello_dagster
 
 
 @repository
