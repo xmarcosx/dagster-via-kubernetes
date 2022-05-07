@@ -4,7 +4,7 @@ dagster-user-deployments:
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "us-central1-docker.pkg.dev/dagster-kubernetes/my-repository/dagster"
+        repository: "us-central1-docker.pkg.dev/dagster-349517/dagster/dagster"
         tag: latest
         pullPolicy: Always
       dagsterApiGrpcArgs:
