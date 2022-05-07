@@ -1,6 +1,7 @@
-## Dagster on GKE
+# Dagster on GKE
+Consider this a playground that looks at running Dagster locally for development and in GKE for production.
 
-### Local environment
+## Local environment
 Authentication with the GCP project happens through a service account. In GCP, head to _IAM & Admin --> Service Accounts_ to create your service account.
 
 * Click **Create Service Account**
@@ -13,13 +14,19 @@ Authentication with the GCP project happens through a service account. In GCP, h
 * Click **Done** 
 * Select the actions menu and click **Create key**. Create a JSON key, rename to _service.json_ and store in the root of the repository.
 
-
-### Production
+Complete you .env file.
 
 ```sh
+poetry env use 3.9.10;
+poetry install;
+dagit -w dagster/workspace.yaml;
+```
 
+
+## Production
+The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
+```sh
 gsutil mb gs://cool-bucket-name
-
 ```
 
 ```sh
@@ -40,7 +47,9 @@ gcloud artifacts repositories create dagster \
 # create gke autopilot cluster
 gcloud container clusters create-auto kubefun;
 
-helm repo add dagster https://dagster-io.github.io/helm;
+gcloud container clusters get-credentials kubefun --region us-central1 --project $GOOGLE_CLOUD_PROJECT
+
+helm repo add dagster https://dagster-io.github.io/helm ;
 
 helm repo update;
 

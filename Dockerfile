@@ -2,7 +2,6 @@ FROM python:3.9-slim
 
 ENV DAGSTER_VERSION="0.14.14"
 
-# ==> Add Dagster layer
 RUN \
     pip install \
         dagster==${DAGSTER_VERSION} \
@@ -18,6 +17,4 @@ RUN \
     &&  rm -rf /usr/lib/python2.7 \
     &&  rm -rf /usr/lib/x86_64-linux-gnu/guile
 
-# ==> Add user code layer
-# Example pipelines
-COPY build_cache/ /
+COPY dagster/ /
