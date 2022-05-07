@@ -1,3 +1,4 @@
 load_from:
   - python_file:
       relative_path: project/repo.py
+      location_name: project
