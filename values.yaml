@@ -13,3 +13,17 @@ dagster-user-deployments:
       port: 3030
       env:
         GCS_BUCKET_NAME: "cool-bucket-name"
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+runLauncher:
+  type: K8sRunLauncher
+  config:
+    k8sRunLauncher:
+      envVars:
+        - "GCS_BUCKET_NAME"
