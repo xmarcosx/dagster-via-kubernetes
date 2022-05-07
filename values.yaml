@@ -9,5 +9,7 @@ dagster-user-deployments:
         pullPolicy: Always
       dagsterApiGrpcArgs:
         - "--python-file"
-        - "/example_project/project/repo.py"
+        - "/project/repo.py"
       port: 3030
+      env:
+        GCS_BUCKET_NAME: "cool-bucket-name"
