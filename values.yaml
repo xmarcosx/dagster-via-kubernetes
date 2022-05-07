@@ -4,8 +4,7 @@ dagster-user-deployments:
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "docker.io/dagster/user-code-example"
-        tag: latest
+        repository: "us-central1-docker.pkg.dev/dagster-kubernetes/my-repository/dagster:latest"
         pullPolicy: Always
       dagsterApiGrpcArgs:
         - "--python-file"

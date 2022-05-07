@@ -2,6 +2,7 @@
 
 ```sh
 gcloud services enable artifactregistry.googleapis.com;
+gcloud services enable cloudbuild.googleapis.com;
 gcloud services enable compute.googleapis.com;
 gcloud services enable container.googleapis.com;
 
@@ -13,6 +14,9 @@ gcloud artifacts repositories create my-repository \
     --repository-format=docker \
     --location=us-central1 \
     --description="Docker repository";
+
+gcloud builds submit \
+    --tag us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-repository/dagster .;
 
 # create gke autopilot cluster
 gcloud container clusters create-auto my-cluster;
@@ -28,8 +32,8 @@ helm show values dagster/dagster > values.yaml;
 
 helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f values.yaml;
 
-export DAGIT_POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}");
+export DAGIT_POD_NAME=$(kubectl get pods --namespace dagster -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}")
 
-kubectl --namespace default port-forward $DAGIT_POD_NAME 8080:80;
+kubectl --namespace dagster port-forward $DAGIT_POD_NAME 8080:80
 
 ```
