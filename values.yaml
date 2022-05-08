@@ -4,7 +4,7 @@ dagster-user-deployments:
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "us-central1-docker.pkg.dev/erudite-azimuth-349601/dagster/dagster"
+        repository: "us-central1-docker.pkg.dev/analog-medium-349613/dagster/dagster"
         tag: latest
         pullPolicy: Always
       dagsterApiGrpcArgs:

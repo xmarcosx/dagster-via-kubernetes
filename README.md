@@ -27,17 +27,34 @@ dagit -w dagster/workspace.yaml;
 The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
 ```sh
 gcloud config set project $GOOGLE_CLOUD_PROJECT;
-gsutil mb gs://cool-bucket-name
+gsutil mb gs://$GOOGLE_CLOUD_PROJECT
 ```
 
-While the Dagster helm chart deploys PostgreSQL in the cluster, this 
+While the Dagster helm chart deploys PostgreSQL in the cluster, this deployment will connect to a Cloud SQL instance via a private ip.
 ```sh
+gcloud compute addresses create google-managed-services-default \
+    --global \
+    --purpose=VPC_PEERING \
+    --prefix-length=16 \
+    --description="peering range" \
+    --network=default;
+
+gcloud services vpc-peerings connect \
+    --service=servicenetworking.googleapis.com \
+    --ranges=google-managed-services-default \
+    --network=default \
+    --project=$GOOGLE_CLOUD_PROJECT;
+
+# create cloud sql instance
 gcloud beta sql instances create \
     --zone us-central1-c \
     --database-version POSTGRES_13 \
     --tier db-f1-micro \
     --storage-auto-increase \
+    --network=projects/$GOOGLE_CLOUD_PROJECT/global/networks/default \
     --backup-start-time 08:00 dagster;
+
+gcloud sql databases create 'dagster' --instance=dagster;
 ```
 
 ```sh
@@ -56,29 +73,47 @@ gcloud artifacts repositories create dagster \
     --location=us-central1 \
     --description="Docker repository";
 
-# create gke autopilot cluster
-gcloud container clusters create-auto kubefun --scopes=gke-default,bigquery,storage-rw,sql-admin --region us-central1;
+export SA_EMAIL=`gcloud iam service-accounts list --format='value(email)' \
+  --filter='displayName:dagster'`
 
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/monitoring.metricWriter;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/monitoring.viewer;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/logging.logWriter;
+
+# create gke autopilot cluster
+gcloud container clusters create-auto kubefun --service-account=$SA_EMAIL --region us-central1;
 kubectl create namespace dagster;
 
-# gcloud container clusters get-credentials kubefun --region us-central1 --project $GOOGLE_CLOUD_PROJECT
-
-kubectl create secret generic dagster-gcs-bucket-name --namespace dagster --from-literal=GCS_BUCKET_NAME=erudite-azimuth-349601;
-kubectl create secret generic dagster-sa-key --namespace dagster --from-file service.json;
+kubectl create secret generic dagster-gcs-bucket-name --namespace dagster --from-literal=GCS_BUCKET_NAME=analog-medium-349613;
 
 helm repo add dagster https://dagster-io.github.io/helm ;
 
 helm repo update;
 
-# kubectl create secret generic gcs-bucket-name --from-literal=AWS_ACCESS_KEY_ID=<YOUR ACCESS KEY ID>
-
 gcloud builds submit \
     --tag us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/dagster/dagster .;
 
-helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f values.yaml;
+helm upgrade --install dagster dagster/dagster --create-namespace -f values.yaml;
+
+# bind kubernetes service account to google service account
+# gcloud iam service-accounts add-iam-policy-binding \
+#   --role="roles/iam.workloadIdentityUser" \
+#   --member="serviceAccount:$GOOGLE_CLOUD_PROJECT.svc.id.goog[default]" \
+#   dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
+
+# kubectl annotate serviceaccount \
+#   dagster \
+#   iam.gke.io/gcp-service-account=dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
 
 export DAGIT_POD_NAME=$(kubectl get pods --namespace dagster -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}")
 
-kubectl --namespace dagster port-forward $DAGIT_POD_NAME 8080:80
-
+kubectl --namespace dagster port-forward $DAGIT_POD_NAME 8080:80;
 ```
