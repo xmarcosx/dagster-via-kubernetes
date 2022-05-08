@@ -14,6 +14,34 @@ Authentication with the GCP project happens through a service account. In GCP, h
 * Click **Done** 
 * Select the actions menu and click **Create key**. Create a JSON key, rename to _service.json_ and store in the root of the repository.
 
+```sh
+gcloud config set project $GOOGLE_CLOUD_PROJECT;
+gcloud iam service-accounts create dagster;
+
+export SA_EMAIL=`gcloud iam service-accounts list --format='value(email)' \
+  --filter='displayName:dagster'`
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/bigquery.jobUser;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/bigquery.user;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/bigquery.dataEditor;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/storage.admin;
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member serviceAccount:$SA_EMAIL \
+  --role roles/artifactregistry.reader;
+```
+
 Complete you .env file.
 
 ```sh
@@ -90,9 +118,8 @@ gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
 
 # create gke autopilot cluster
 gcloud container clusters create-auto kubefun --service-account=$SA_EMAIL --region us-central1;
-kubectl create namespace dagster;
 
-kubectl create secret generic dagster-gcs-bucket-name --namespace dagster --from-literal=GCS_BUCKET_NAME=analog-medium-349613;
+kubectl create secret generic dagster-gcs-bucket-name --from-literal=GCS_BUCKET_NAME=analog-medium-349613;
 
 helm repo add dagster https://dagster-io.github.io/helm ;
 
@@ -101,19 +128,19 @@ helm repo update;
 gcloud builds submit \
     --tag us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/dagster/dagster .;
 
-helm upgrade --install dagster dagster/dagster --create-namespace -f values.yaml;
+helm upgrade --install dagster dagster/dagster -f values.yaml;
 
 # bind kubernetes service account to google service account
-# gcloud iam service-accounts add-iam-policy-binding \
-#   --role="roles/iam.workloadIdentityUser" \
-#   --member="serviceAccount:$GOOGLE_CLOUD_PROJECT.svc.id.goog[default]" \
-#   dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
+gcloud iam service-accounts add-iam-policy-binding \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="serviceAccount:$GOOGLE_CLOUD_PROJECT.svc.id.goog[default]" \
+  dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
 
-# kubectl annotate serviceaccount \
-#   dagster \
-#   iam.gke.io/gcp-service-account=dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
+kubectl annotate serviceaccount \
+  default \
+  iam.gke.io/gcp-service-account=dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
 
-export DAGIT_POD_NAME=$(kubectl get pods --namespace dagster -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}")
+export DAGIT_POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}")
 
-kubectl --namespace dagster port-forward $DAGIT_POD_NAME 8080:80;
+kubectl --namespace default port-forward $DAGIT_POD_NAME 8080:80;
 ```
