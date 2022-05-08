@@ -26,7 +26,18 @@ dagit -w dagster/workspace.yaml;
 ## Production
 The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
 ```sh
+gcloud config set project $GOOGLE_CLOUD_PROJECT;
 gsutil mb gs://cool-bucket-name
+```
+
+While the Dagster helm chart deploys PostgreSQL in the cluster, this 
+```sh
+gcloud beta sql instances create \
+    --zone us-central1-c \
+    --database-version POSTGRES_13 \
+    --tier db-f1-micro \
+    --storage-auto-increase \
+    --backup-start-time 08:00 dagster;
 ```
 
 ```sh
@@ -34,6 +45,7 @@ gcloud services enable artifactregistry.googleapis.com;
 gcloud services enable cloudbuild.googleapis.com;
 gcloud services enable compute.googleapis.com;
 gcloud services enable container.googleapis.com;
+gcloud services enable sqladmin.googleapis.com;
 
 gcloud config set compute/region us-central1;
 
@@ -45,13 +57,20 @@ gcloud artifacts repositories create dagster \
     --description="Docker repository";
 
 # create gke autopilot cluster
-gcloud container clusters create-auto kubefun;
+gcloud container clusters create-auto kubefun --scopes=gke-default,bigquery,storage-rw,sql-admin --region us-central1;
 
-gcloud container clusters get-credentials kubefun --region us-central1 --project $GOOGLE_CLOUD_PROJECT
+kubectl create namespace dagster;
+
+# gcloud container clusters get-credentials kubefun --region us-central1 --project $GOOGLE_CLOUD_PROJECT
+
+kubectl create secret generic dagster-gcs-bucket-name --namespace dagster --from-literal=GCS_BUCKET_NAME=erudite-azimuth-349601;
+kubectl create secret generic dagster-sa-key --namespace dagster --from-file service.json;
 
 helm repo add dagster https://dagster-io.github.io/helm ;
 
 helm repo update;
+
+# kubectl create secret generic gcs-bucket-name --from-literal=AWS_ACCESS_KEY_ID=<YOUR ACCESS KEY ID>
 
 gcloud builds submit \
     --tag us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/dagster/dagster .;

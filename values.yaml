@@ -4,15 +4,15 @@ dagster-user-deployments:
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "us-central1-docker.pkg.dev/dagster-349517/dagster/dagster"
+        repository: "us-central1-docker.pkg.dev/erudite-azimuth-349601/dagster/dagster"
         tag: latest
         pullPolicy: Always
       dagsterApiGrpcArgs:
         - "--python-file"
         - "/project/repo.py"
       port: 3030
-      env:
-        GCS_BUCKET_NAME: "cool-bucket-name"
+      envSecrets:
+        - name: dagster-gcs-bucket-name
       resources:
         limits:
           cpu: 100m
@@ -25,5 +25,5 @@ runLauncher:
   type: K8sRunLauncher
   config:
     k8sRunLauncher:
-      envVars:
-        - "GCS_BUCKET_NAME"
+      envSecrets:
+        - name: dagster-gcs-bucket-name

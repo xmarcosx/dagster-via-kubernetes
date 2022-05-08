@@ -30,7 +30,7 @@ hello_dagster_prod_job = hello_dagster.to_job(
     resource_defs={
         "gcs": gcs_resource,
         "io_manager": gcs_pickle_io_manager.configured(
-            {"gcs_bucket": os.getenv("GCS_BUCKET_NAME"), "gcs_prefix": "dagster_io"}
+            {"gcs_bucket": "erudite-azimuth-349601", "gcs_prefix": "dagster_io"}
         ),
     },
 )
