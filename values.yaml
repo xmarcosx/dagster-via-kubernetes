@@ -24,6 +24,13 @@ dagster-user-deployments:
           cpu: 100m
           memory: 128Mi
 
+postgresql:
+  enabled: false
+  postgresqlHost: "10.99.0.3"
+  postgresqlUsername: "postgres"
+  postgresqlPassword: "SuperSafe"
+  postgresqlDatabase: "dagster"
+
 runLauncher:
   type: K8sRunLauncher
   config:

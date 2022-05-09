@@ -50,6 +50,7 @@ gcloud services enable artifactregistry.googleapis.com;
 gcloud services enable cloudbuild.googleapis.com;
 gcloud services enable compute.googleapis.com;
 gcloud services enable container.googleapis.com;
+gcloud services enable servicenetworking.googleapis.com;
 gcloud services enable sqladmin.googleapis.com;
 ```
 
@@ -83,6 +84,8 @@ gcloud beta sql instances create \
     --backup-start-time 08:00 dagster;
 
 gcloud sql databases create 'dagster' --instance=dagster;
+
+# TODO: set the postgres user password
 
 # create artifact registry repository
 gcloud artifacts repositories create dagster \
