@@ -28,8 +28,9 @@ postgresql:
   enabled: false
   postgresqlHost: "10.99.0.3"
   postgresqlUsername: "postgres"
-  postgresqlPassword: "SuperSafe"
   postgresqlDatabase: "dagster"
+
+generatePostgresqlPasswordSecret: false
 
 runLauncher:
   type: K8sRunLauncher
