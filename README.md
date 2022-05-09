@@ -4,19 +4,10 @@ Consider this a playground that looks at running Dagster locally for development
 ## Local environment
 Authentication with the GCP project happens through a service account. In GCP, head to _IAM & Admin --> Service Accounts_ to create your service account.
 
-* Click **Create Service Account**
-* Choose a name (ie. dagster) and click **Create**
-* Grant the service account the following roles
-    * BigQuery Job User
-    * BigQuery User
-    * BigQuery Data Editor
-    * Storage Admin
-* Click **Done** 
-* Select the actions menu and click **Create key**. Create a JSON key, rename to _service.json_ and store in the root of the repository.
-
 ```sh
 gcloud config set project $GOOGLE_CLOUD_PROJECT;
-gcloud iam service-accounts create dagster;
+gcloud iam service-accounts create dagster \
+  --display-name="dagster";
 
 export SA_EMAIL=`gcloud iam service-accounts list --format='value(email)' \
   --filter='displayName:dagster'`
@@ -37,12 +28,11 @@ gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
   --member serviceAccount:$SA_EMAIL \
   --role roles/storage.admin;
 
-gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-  --member serviceAccount:$SA_EMAIL \
-  --role roles/artifactregistry.reader;
+gcloud iam service-accounts keys create service.json \
+    --iam-account=$SA_EMAIL;
 ```
 
-Complete you .env file.
+Complete your .env file.
 
 ```sh
 poetry env use 3.9.10;
