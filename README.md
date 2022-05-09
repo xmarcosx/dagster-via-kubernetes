@@ -91,25 +91,10 @@ gcloud artifacts repositories create dagster \
     --location=us-central1 \
     --description="Docker repository";
 
-export SA_EMAIL=`gcloud iam service-accounts list --format='value(email)' \
-  --filter='displayName:dagster'`
-
-gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-  --member serviceAccount:$SA_EMAIL \
-  --role roles/monitoring.metricWriter;
-
-gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-  --member serviceAccount:$SA_EMAIL \
-  --role roles/monitoring.viewer;
-
-gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-  --member serviceAccount:$SA_EMAIL \
-  --role roles/logging.logWriter;
-
 # create gke autopilot cluster
-gcloud container clusters create-auto kubefun --service-account=$SA_EMAIL --region us-central1;
+gcloud container clusters create-auto kubefun --region us-central1;
 
-kubectl create secret generic dagster-gcs-bucket-name --from-literal=GCS_BUCKET_NAME=analog-medium-349613;
+kubectl create secret generic dagster-gcs-bucket-name --from-literal=GCS_BUCKET_NAME=main-form-349700;
 
 helm repo add dagster https://dagster-io.github.io/helm ;
 
@@ -123,11 +108,15 @@ helm upgrade --install dagster dagster/dagster -f values.yaml;
 # bind kubernetes service account to google service account
 gcloud iam service-accounts add-iam-policy-binding \
   --role="roles/iam.workloadIdentityUser" \
-  --member="serviceAccount:$GOOGLE_CLOUD_PROJECT.svc.id.goog[default]" \
+  --member="serviceAccount:$GOOGLE_CLOUD_PROJECT.svc.id.goog[default/dagster]" \
   dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
 
 kubectl annotate serviceaccount \
   default \
+  iam.gke.io/gcp-service-account=dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
+
+kubectl annotate serviceaccount \
+  dagster \
   iam.gke.io/gcp-service-account=dagster@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com;
 
 export DAGIT_POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=dagster,app.kubernetes.io/instance=dagster,component=dagit" -o jsonpath="{.items[0].metadata.name}")

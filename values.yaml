@@ -1,10 +1,13 @@
 
+global:
+  serviceAccountName: "dagster"
+
 dagster-user-deployments:
   enabled: true
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "us-central1-docker.pkg.dev/analog-medium-349613/dagster/dagster"
+        repository: "us-central1-docker.pkg.dev/main-form-349700/dagster/dagster"
         tag: latest
         pullPolicy: Always
       dagsterApiGrpcArgs:
