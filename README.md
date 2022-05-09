@@ -1,8 +1,8 @@
 # Dagster on GKE
-Consider this a playground that looks at running Dagster locally for development and in GKE for production.
+Consider this a PoC that looks at running Dagster locally for development and in GKE for production.
 
 ## Local environment
-Authentication with the GCP project happens through a service account. In GCP, head to _IAM & Admin --> Service Accounts_ to create your service account.
+Authentication with the GCP project happens through a service account. The commands below will create a service account and download a JSON key.
 
 ```sh
 gcloud config set project $GOOGLE_CLOUD_PROJECT;
@@ -42,9 +42,19 @@ dagit -w dagster/workspace.yaml;
 
 
 ## Production
-The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
 ```sh
 gcloud config set project $GOOGLE_CLOUD_PROJECT;
+gcloud config set compute/region us-central1;
+
+gcloud services enable artifactregistry.googleapis.com;
+gcloud services enable cloudbuild.googleapis.com;
+gcloud services enable compute.googleapis.com;
+gcloud services enable container.googleapis.com;
+gcloud services enable sqladmin.googleapis.com;
+```
+
+The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
+```sh
 gsutil mb gs://$GOOGLE_CLOUD_PROJECT
 ```
 
@@ -73,16 +83,6 @@ gcloud beta sql instances create \
     --backup-start-time 08:00 dagster;
 
 gcloud sql databases create 'dagster' --instance=dagster;
-```
-
-```sh
-gcloud services enable artifactregistry.googleapis.com;
-gcloud services enable cloudbuild.googleapis.com;
-gcloud services enable compute.googleapis.com;
-gcloud services enable container.googleapis.com;
-gcloud services enable sqladmin.googleapis.com;
-
-gcloud config set compute/region us-central1;
 
 # create artifact registry repository
 gcloud artifacts repositories create dagster \
