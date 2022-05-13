@@ -2,7 +2,7 @@
 Consider this a PoC that looks at running Dagster locally for development and in GKE for production.
 
 ## Local environment
-Authentication with the GCP project happens through a service account. The commands below will create a service account and download a JSON key.
+Authentication with the GCP project happens through a service account. The commands below will create a service account and download a JSON key. This service account will also be used via Workload Identity when deployed in production on GKE.
 
 ```sh
 gcloud config set project $GOOGLE_CLOUD_PROJECT;
