@@ -13,12 +13,23 @@ dagit:
       memory: 512Mi
       ephemeral-storage: 1Gi
 
+dagsterDaemon:
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
 dagster-user-deployments:
   enabled: true
   deployments:
     - name: "ilvermorny"
       image:
-        repository: "us-central1-docker.pkg.dev/main-form-349700/dagster/dagster"
+        repository: "us-central1-docker.pkg.dev/google-project-id/dagster/dagster"
         tag: latest
         pullPolicy: Always
       dagsterApiGrpcArgs:
