@@ -98,7 +98,7 @@ gcloud artifacts repositories create dagster \
 gcloud container clusters create-auto kubefun --region us-central1;
 
 kubectl create secret generic dagster-gcs-bucket-name --from-literal=GCS_BUCKET_NAME=main-form-349700;
-kubectl create secret generic dagster-postgresql-secret --from-literal=postgresql-password=SecretPassword;
+kubectl create secret generic dagster-postgresql-secret --from-literal=postgresql-password='SecretPassword';
 
 helm repo add dagster https://dagster-io.github.io/helm ;
 

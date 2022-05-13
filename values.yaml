@@ -2,6 +2,17 @@
 global:
   serviceAccountName: "dagster"
 
+dagit:
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
 dagster-user-deployments:
   enabled: true
   deployments:
@@ -18,15 +29,15 @@ dagster-user-deployments:
         - name: dagster-gcs-bucket-name
       resources:
         limits:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 250m
+          memory: 512Mi
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 250m
+          memory: 512Mi
 
 postgresql:
   enabled: false
-  postgresqlHost: "10.99.0.3"
+  postgresqlHost: "10.0.0.0"
   postgresqlUsername: "postgres"
   postgresqlDatabase: "dagster"
 
