@@ -52,6 +52,7 @@ gcloud services enable compute.googleapis.com;
 gcloud services enable container.googleapis.com;
 gcloud services enable servicenetworking.googleapis.com;
 gcloud services enable sqladmin.googleapis.com;
+gcloud services enable iamcredentials.googleapis.com;
 ```
 
 The production job uses the Google Cloud Storage (GCS) IO manager. This requires a GCS bucket.
