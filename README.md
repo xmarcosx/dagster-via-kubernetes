@@ -110,6 +110,17 @@ gcloud builds submit \
 
 helm upgrade --install dagster dagster/dagster -f values.yaml;
 
+kubectl create configmap dagster-lea-vars \
+    --from-literal GCS_BUCKET_DEV='dagster-dev-bucket-name' \
+    --from-literal GCS_BUCKET_PROD='dagster-prod-bucket-name' \
+    --from-literal DBT_PROJECT_DIR='/opt/dagster/app/dbt' \
+    --from-literal DBT_PROFILES_DIR='/opt/dagster/app';
+
+kubectl create secret generic dagster-edfi-api \
+    --from-literal EDFI_BASE_URL='XXXXXXXX' \
+    --from-literal EDFI_API_KEY='XXXXXXXX' \
+    --from-literal EDFI_API_SECRET='XXXXXXXX';
+
 # bind kubernetes service account to google service account
 gcloud iam service-accounts add-iam-policy-binding \
   --role="roles/iam.workloadIdentityUser" \

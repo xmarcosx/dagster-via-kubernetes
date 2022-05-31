@@ -1,0 +1,26 @@
+
+deployments:
+  - name: "user-code-deployment-host-name"
+    image:
+      repository: "us-central1-docker.pkg.dev/gcp-project-id/dagster/dagster"
+      tag: latest
+      pullPolicy: Always
+    dagsterApiGrpcArgs:
+      - "--python-file"
+      - "/opt/dagster/app/project/prod_repository.py"
+    port: 3030
+    envConfigMaps:
+      - name: dagster-lea-vars
+    envSecrets:
+      - name: dagster-edfi-api
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "512Mi"
+        ephemeral-storage: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+        ephemeral-storage: "1Gi"
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"

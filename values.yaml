@@ -3,50 +3,38 @@ global:
   serviceAccountName: "dagster"
 
 dagit:
+  workspace:
+    enabled: true
+    servers:
+      - host: "user-code-deployment-host-name"
+        port: 3030
+    envConfigMaps:
+      - name: dagster-lea-vars
   resources:
     limits:
-      cpu: 250m
-      memory: 512Mi
-      ephemeral-storage: 1Gi
+      cpu: "250m"
+      memory: "512Mi"
+      ephemeral-storage: "1Gi"
     requests:
-      cpu: 250m
-      memory: 512Mi
-      ephemeral-storage: 1Gi
+      cpu: "250m"
+      memory: "512Mi"
+      ephemeral-storage: "1Gi"
   nodeSelector:
     cloud.google.com/gke-spot: "true"
 
 dagsterDaemon:
   resources:
     limits:
-      cpu: 250m
-      memory: 512Mi
-      ephemeral-storage: 1Gi
+      cpu: "250m"
+      memory: "512Mi"
+      ephemeral-storage: "1Gi"
     requests:
-      cpu: 250m
-      memory: 512Mi
-      ephemeral-storage: 1Gi
+      cpu: "250m"
+      memory: "512Mi"
+      ephemeral-storage: "1Gi"
 
 dagster-user-deployments:
-  enabled: true
-  deployments:
-    - name: "ilvermorny"
-      image:
-        repository: "us-central1-docker.pkg.dev/google-project-id/dagster/dagster"
-        tag: latest
-        pullPolicy: Always
-      dagsterApiGrpcArgs:
-        - "--python-file"
-        - "/project/repo.py"
-      port: 3030
-      envSecrets:
-        - name: dagster-gcs-bucket-name
-      resources:
-        limits:
-          cpu: 250m
-          memory: 512Mi
-        requests:
-          cpu: 250m
-          memory: 512Mi
+  enableSubchart: false
 
 postgresql:
   enabled: false
@@ -60,5 +48,16 @@ runLauncher:
   type: K8sRunLauncher
   config:
     k8sRunLauncher:
+      envConfigMaps:
+        - name: dagster-lea-vars
       envSecrets:
-        - name: dagster-gcs-bucket-name
+        - name: dagster-edfi-api
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "512Mi"
+          ephemeral-storage: "1Gi"
+        requests:
+          cpu: "250m"
+          memory: "512Mi"
+          ephemeral-storage: "1Gi"
