@@ -1,4 +1,7 @@
 
+global:
+  serviceAccountName: "dagster"
+
 deployments:
   - name: "user-code-deployment-host-name"
     image:
